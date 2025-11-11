@@ -1,0 +1,13 @@
+src/java/db/DBConnection.java
+nbproject/private/
+nbproject/Makefile-*.mk
+nbproject/Package-*.bash
+nbactions.xml
+nb-configuration.xml
+build/
+nbbuild/
+dist/
+nbdist/
+*.war
+*.ear
+src/java/dao/DBConnect.java
