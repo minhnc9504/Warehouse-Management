@@ -1,11 +1,13 @@
 [phases.setup]
-nixPkgs = ["ant", "jdk17"]
+nixPkgs = ["ant", "jdk17", "tomcat9"]
 
 [phases.install]
 cmds = [
-  "ant war"
+  "ant dist",
+  "mkdir -p /tmp/tomcat/webapps",
+  "cp dist/Warehouse.war /tmp/tomcat/webapps/ROOT.war"
 ]
 
 [start]
-cmd = "java -jar dist/Warehouse.war"
+cmd = "CATALINA_HOME=/tmp/tomcat /nix/store/*tomcat*/bin/catalina.sh run"
 
