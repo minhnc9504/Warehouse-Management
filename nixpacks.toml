@@ -3,10 +3,10 @@ nixPkgs = ["ant", "jdk17", "tomcat9"]
 
 [phases.install]
 cmds = [
-  "ant dist",
+  "chmod +x build.sh start.sh",
+  "./build.sh",
   "mkdir -p webapps logs temp work",
-  "cp dist/Warehouse.war webapps/ROOT.war",
-  "chmod +x start.sh"
+  "cp dist/Warehouse.war webapps/ROOT.war"
 ]
 
 [start]
