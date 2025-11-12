@@ -20,8 +20,30 @@ fi
 echo "Found Tomcat at: $TOMCAT_HOME"
 echo "Building WAR file with j2ee.server.home=$TOMCAT_HOME"
 
-# Build WAR file with Tomcat home directory
-ant -Dj2ee.server.home="$TOMCAT_HOME" dist
+# Verify Tomcat structure
+if [ ! -f "$TOMCAT_HOME/lib/catalina.jar" ]; then
+    echo "WARNING: catalina.jar not found at $TOMCAT_HOME/lib/catalina.jar"
+    echo "Tomcat lib directory contents:"
+    ls -la "$TOMCAT_HOME/lib/" | head -10 || true
+fi
 
-echo "Build completed successfully!"
+# Build WAR file with Tomcat home directory (verbose mode)
+echo "Starting Ant build..."
+if ant -Dj2ee.server.home="$TOMCAT_HOME" -verbose dist; then
+    echo "Build completed successfully!"
+    
+    # Verify WAR file was created
+    if [ -f "dist/Warehouse.war" ]; then
+        echo "WAR file created: dist/Warehouse.war"
+        ls -lh dist/Warehouse.war
+    else
+        echo "ERROR: WAR file not found at dist/Warehouse.war"
+        echo "Contents of dist directory:"
+        ls -la dist/ || echo "dist directory does not exist"
+        exit 1
+    fi
+else
+    echo "ERROR: Ant build failed!"
+    exit 1
+fi
 
