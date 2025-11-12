@@ -1,2 +1,2 @@
-web: java -jar dist/Warehouse.war
+web: ./start.sh
 
