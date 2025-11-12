@@ -23,13 +23,7 @@ import java.time.LocalDate;
 @WebServlet(name = "GoogleCallbackServlet", urlPatterns = {"/google-callback"})
 public class GoogleCallbackServlet extends HttpServlet {
     
-    // Read from environment variables for security (Railway/Production)
-    // Fallback to default for local development only
-    private static final String CLIENT_ID = System.getenv("GOOGLE_CLIENT_ID") != null 
-            ? System.getenv("GOOGLE_CLIENT_ID")
-            : "581314272217-kco17fruthlhvfrmc575a4c08tiv7jhq.apps.googleusercontent.com";
-    
-    // Client Secret - MUST be set via environment variable in production
+    private static final String CLIENT_ID = System.getenv("GOOGLE_CLIENT_ID");
     private static final String CLIENT_SECRET = System.getenv("GOOGLE_CLIENT_SECRET");
     private static final String TOKEN_URL = "https://oauth2.googleapis.com/token";
     private static final String USER_INFO_URL = "https://www.googleapis.com/oauth2/v2/userinfo";
@@ -98,6 +92,16 @@ public class GoogleCallbackServlet extends HttpServlet {
             return;
         }
         
+        // Check if OAuth credentials are configured
+        if (CLIENT_ID == null || CLIENT_ID.isEmpty() || CLIENT_SECRET == null || CLIENT_SECRET.isEmpty()) {
+            System.err.println("[GoogleCallbackServlet] ERROR: Google OAuth credentials not configured!");
+            System.err.println("  - GOOGLE_CLIENT_ID: " + (CLIENT_ID != null ? "set" : "NOT SET"));
+            System.err.println("  - GOOGLE_CLIENT_SECRET: " + (CLIENT_SECRET != null ? "set" : "NOT SET"));
+            request.setAttribute("error", "Google OAuth chưa được cấu hình. Vui lòng liên hệ quản trị viên.");
+            request.getRequestDispatcher("/login.jsp").forward(request, response);
+            return;
+        }
+        
         try {
             // Build redirect URI dynamically (must match the one in GoogleLoginServlet)
             String redirectUri = buildRedirectUri(request);
@@ -110,11 +114,11 @@ public class GoogleCallbackServlet extends HttpServlet {
             if (accessToken == null) {
                 String errorMsg = "Không thể lấy access token từ Google.\n\n";
                 errorMsg += "Có thể do:\n";
-                errorMsg += "- Client Secret chưa được cấu hình đúng\n";
+                errorMsg += "- Client Secret chưa được cấu hình đúng (kiểm tra biến môi trường GOOGLE_CLIENT_SECRET)\n";
                 errorMsg += "- Code đã hết hạn hoặc đã được sử dụng\n";
                 errorMsg += "- Redirect URI không khớp với lúc gửi request\n\n";
                 errorMsg += "Vui lòng kiểm tra:\n";
-                errorMsg += "1. Client Secret trong GoogleCallbackServlet.java\n";
+                errorMsg += "1. Biến môi trường GOOGLE_CLIENT_SECRET đã được thiết lập\n";
                 errorMsg += "2. Log trong console để xem chi tiết lỗi";
                 
                 request.setAttribute("error", errorMsg);
@@ -208,12 +212,6 @@ public class GoogleCallbackServlet extends HttpServlet {
     }
     
     private String exchangeCodeForToken(String code, String redirectUri) throws IOException, InterruptedException {
-        // Validate CLIENT_SECRET
-        if (CLIENT_SECRET == null || CLIENT_SECRET.isEmpty()) {
-            System.err.println("[GoogleCallbackServlet] ERROR: GOOGLE_CLIENT_SECRET environment variable is not set!");
-            throw new IllegalStateException("GOOGLE_CLIENT_SECRET environment variable must be set");
-        }
-        
         HttpClient client = HttpClient.newHttpClient();
         
         // Debug: Log thông tin (không log CLIENT_SECRET)

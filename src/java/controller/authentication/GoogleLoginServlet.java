@@ -10,11 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 @WebServlet(name = "GoogleLoginServlet", urlPatterns = {"/google-login"})
 public class GoogleLoginServlet extends HttpServlet {
     
-    // Read from environment variables for security (Railway/Production)
-    // Fallback to default for local development only
-    private static final String CLIENT_ID = System.getenv("GOOGLE_CLIENT_ID") != null 
-            ? System.getenv("GOOGLE_CLIENT_ID")
-            : "581314272217-kco17fruthlhvfrmc575a4c08tiv7jhq.apps.googleusercontent.com";
+    private static final String CLIENT_ID = System.getenv("GOOGLE_CLIENT_ID");
     private static final String SCOPE = "openid email profile";
     
     @Override
@@ -56,6 +52,14 @@ public class GoogleLoginServlet extends HttpServlet {
         System.out.println("  - Query String: " + request.getQueryString());
         System.out.println("  - User-Agent: " + request.getHeader("User-Agent"));
         System.out.println("========================================");
+        
+        // Check if CLIENT_ID is configured
+        if (CLIENT_ID == null || CLIENT_ID.isEmpty()) {
+            System.err.println("[GoogleLoginServlet] ERROR: GOOGLE_CLIENT_ID environment variable is not set!");
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
+                "Google OAuth is not configured. Please set GOOGLE_CLIENT_ID environment variable.");
+            return;
+        }
         
         // Build Google OAuth URL
         String authUrl = "https://accounts.google.com/o/oauth2/v2/auth?"
