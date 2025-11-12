@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Warehouse" default="dist" basedir=".">
+    <description>Simple build script for Warehouse WAR</description>
+    
+    <!-- Properties -->
+    <property name="src.dir" value="src/java"/>
+    <property name="web.dir" value="web"/>
+    <property name="lib.dir" value="lib"/>
+    <property name="build.dir" value="build"/>
+    <property name="build.classes.dir" value="${build.dir}/web/WEB-INF/classes"/>
+    <property name="build.web.dir" value="${build.dir}/web"/>
+    <property name="dist.dir" value="dist"/>
+    <property name="war.name" value="Warehouse.war"/>
+    
+    <!-- Tomcat home will be passed from build.sh -->
+    <property name="tomcat.home" value="${j2ee.server.home}"/>
+    
+    <echo message="Using Tomcat at: ${tomcat.home}"/>
+    
+    <!-- Classpath -->
+    <path id="compile.classpath">
+        <fileset dir="${lib.dir}">
+            <include name="*.jar"/>
+        </fileset>
+        <fileset dir="${tomcat.home}/lib" erroronmissingdir="false">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+    
+    <!-- Clean -->
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+        <delete dir="${dist.dir}"/>
+    </target>
+    
+    <!-- Init -->
+    <target name="init">
+        <mkdir dir="${build.classes.dir}"/>
+        <mkdir dir="${build.web.dir}"/>
+        <mkdir dir="${dist.dir}"/>
+    </target>
+    
+    <!-- Compile -->
+    <target name="compile" depends="init">
+        <javac srcdir="${src.dir}" 
+               destdir="${build.classes.dir}" 
+               includeantruntime="false"
+               source="17"
+               target="17"
+               encoding="UTF-8">
+            <classpath refid="compile.classpath"/>
+        </javac>
+        <copy todir="${build.classes.dir}">
+            <fileset dir="${src.dir}" excludes="**/*.java"/>
+        </copy>
+    </target>
+    
+    <!-- Copy web files -->
+    <target name="copy-web" depends="init">
+        <copy todir="${build.web.dir}">
+            <fileset dir="${web.dir}"/>
+        </copy>
+    </target>
+    
+    <!-- Copy libraries -->
+    <target name="copy-libs" depends="init">
+        <copy todir="${build.web.dir}/WEB-INF/lib">
+            <fileset dir="${lib.dir}">
+                <include name="*.jar"/>
+            </fileset>
+        </copy>
+    </target>
+    
+    <!-- Build WAR -->
+    <target name="dist" depends="compile,copy-web,copy-libs">
+        <war destfile="${dist.dir}/${war.name}" webxml="${build.web.dir}/WEB-INF/web.xml">
+            <fileset dir="${build.web.dir}">
+                <exclude name="WEB-INF/web.xml"/>
+            </fileset>
+            <webinf dir="${build.web.dir}/WEB-INF">
+                <include name="web.xml"/>
+            </webinf>
+        </war>
+        <echo message="WAR file created: ${dist.dir}/${war.name}"/>
+    </target>
+</project>
+
