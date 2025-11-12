@@ -17,15 +17,45 @@
     
     <echo message="Using Tomcat at: ${tomcat.home}"/>
     
-    <!-- Classpath -->
+    <!-- Verify Tomcat lib exists -->
+    <available file="${tomcat.home}/lib" type="dir" property="tomcat.lib.exists"/>
+    <fail unless="tomcat.lib.exists" message="Tomcat lib directory not found: ${tomcat.home}/lib"/>
+    
+    <!-- Check for servlet-api.jar specifically -->
+    <available file="${tomcat.home}/lib/servlet-api.jar" property="servlet.api.exists"/>
+    <available file="${tomcat.home}/lib/jakarta.servlet-api.jar" property="jakarta.servlet.api.exists"/>
+    
+    <echo message="Tomcat lib directory: ${tomcat.home}/lib"/>
+    <echo message="servlet-api.jar exists: ${servlet.api.exists}"/>
+    <echo message="jakarta.servlet-api.jar exists: ${jakarta.servlet.api.exists}"/>
+    
+    <!-- List Tomcat lib files for debugging -->
+    <echo message="Tomcat lib directory contents:"/>
+    <fileset id="tomcat.libs" dir="${tomcat.home}/lib" includes="*.jar"/>
+    <pathconvert property="tomcat.libs.list" refid="tomcat.libs" pathsep="${line.separator}  - "/>
+    <echo message="  - ${tomcat.libs.list}"/>
+    
+    <!-- Classpath - include all Tomcat libs -->
     <path id="compile.classpath">
+        <!-- Project libraries -->
         <fileset dir="${lib.dir}">
             <include name="*.jar"/>
         </fileset>
-        <fileset dir="${tomcat.home}/lib" erroronmissingdir="false">
+        <!-- Tomcat libraries - all JARs -->
+        <fileset dir="${tomcat.home}/lib">
             <include name="*.jar"/>
         </fileset>
+        <!-- Explicit servlet API if found -->
+        <fileset dir="${tomcat.home}/lib">
+            <include name="servlet-api.jar"/>
+            <include name="jakarta.servlet-api.jar"/>
+            <include name="jakarta-servlet-api*.jar"/>
+        </fileset>
     </path>
+    
+    <!-- Debug: Print classpath -->
+    <pathconvert property="compile.classpath.list" refid="compile.classpath" pathsep="${line.separator}  - "/>
+    <echo message="Compile classpath (${ant.file}):${line.separator}  - ${compile.classpath.list}"/>
     
     <!-- Clean -->
     <target name="clean">

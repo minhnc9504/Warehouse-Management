@@ -45,7 +45,8 @@ fi
 
 # Build WAR file with Tomcat home directory (verbose mode)
 echo "Starting NetBeans Ant build..."
-if ant -Dj2ee.server.home="$TOMCAT_HOME" -verbose dist 2>&1; then
+echo "Setting j2ee.server.home=$TOMCAT_HOME"
+if ant -Dj2ee.server.home="$TOMCAT_HOME" -Djavac.source=17 -Djavac.target=17 dist 2>&1; then
     echo "Build completed successfully!"
     
     # Verify WAR file was created
