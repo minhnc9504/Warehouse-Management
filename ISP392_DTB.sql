@@ -1244,7 +1244,7 @@ GO
 INSERT INTO [User] 
 (username, password, first_name, last_name, role_id, gender, address, email, date_of_birth, profile_pic, status, warehouse_id)
 VALUES
-('minhnc', 'Minh9504', N'Nguyen Cong', N'Minh', 2, 'Male', N'Hanoi', 'minhnc@gmail.com', '2004-05-19', 'profile.png', 'Active', 1);
-
+('minhnc', 'Minh9504', N'Nguyen Cong', N'Minh', 1, 'Male', N'Hanoi', 'minhnc@gmail.com', '2004-05-19', 'profile.png', 'Active', 1);
+SELECT * FROM [User];
 
 select *from User
